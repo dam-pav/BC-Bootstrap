@@ -48,6 +48,31 @@ foreach ($variableName in 'BCC_CONFIG_FILE', 'BCC_PARAMETERS_FILE') {
     }
 }
 
+if ($env:GITHUB_REPO) {
+    if ($env:GITHUB_REPO -notmatch '^[^/\s]+/[^/\s]+$') {
+        throw 'GITHUB_REPO must use owner/repository format.'
+    }
+
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    New-Item -ItemType Directory -Path $configDirectory -Force | Out-Null
+    $headers = @{
+        Accept = 'application/vnd.github.raw+json'
+        'X-GitHub-Api-Version' = '2022-11-28'
+        'User-Agent' = 'BcContainerHelper-bootstrap'
+    }
+    if ($env:GITHUB_TOKEN) {
+        $headers.Authorization = "Bearer $($env:GITHUB_TOKEN)"
+    }
+
+    foreach ($destination in $env:BCC_CONFIG_FILE, $env:BCC_PARAMETERS_FILE) {
+        $fileName = [System.IO.Path]::GetFileName($destination)
+        $encodedFileName = [Uri]::EscapeDataString($fileName)
+        $uri = "https://api.github.com/repos/$($env:GITHUB_REPO)/contents/config/$encodedFileName"
+        Write-Host "Downloading config/$fileName from $($env:GITHUB_REPO)"
+        Invoke-RestMethod -Uri $uri -Headers $headers -OutFile $destination
+    }
+}
+
 $parameters = @{}
 
 if ($env:BCC_PARAMETERS_FILE -and (Test-Path -LiteralPath $env:BCC_PARAMETERS_FILE)) {
@@ -60,6 +85,10 @@ if ($env:BCC_PARAMETERS_JSON) {
 Get-ChildItem Env: | Where-Object Name -like 'BCC_PARAM_*' | ForEach-Object {
     $name = $_.Name.Substring('BCC_PARAM_'.Length)
     $parameters[$name] = ConvertFrom-EnvironmentValue $_.Value
+}
+
+if ($env:BCC_CONTAINER_NAME) {
+    $parameters['containerName'] = $env:BCC_CONTAINER_NAME
 }
 
 if ($parameters.ContainsKey('Credential')) {

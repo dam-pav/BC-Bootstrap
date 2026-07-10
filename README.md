@@ -38,6 +38,14 @@ Parameters are merged in this order, with later sources overriding earlier ones:
 2. JSON in `BCC_PARAMETERS_JSON`
 3. every environment variable named `BCC_PARAM_<parameterName>`
 
+`BCC_CONTAINER_NAME` provides a dedicated override for `containerName`.
+
+For Portainer deployments that do not clone repository contents, set
+`GITHUB_REPO` to `owner/repository`. The bootstrap downloads
+`BCC_CONFIG_FILENAME` and `BCC_PARAMETERS_FILENAME` from that repository's
+`config/` directory into `HOST_CONFIG_PATH` before reading them. Set
+`GITHUB_TOKEN` when the repository is private.
+
 This allows any parameter exposed by the installed BcContainerHelper command.
 Unknown names fail early. JSON values retain their types, so booleans, arrays,
 objects, numbers, and strings are supported. For example:

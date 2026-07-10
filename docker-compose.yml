@@ -12,10 +12,13 @@ services:
       BCC_COMMAND: ${BCC_COMMAND:-New-BcContainer}
       BCC_CONFIG_FILE: C:\bootstrap\config\${BCC_CONFIG_FILENAME:-bccontainerhelper.config.json}
       BCC_PARAMETERS_FILE: C:\bootstrap\config\${BCC_PARAMETERS_FILENAME:-parameters.json}
+      BCC_CONTAINER_NAME: ${BCC_CONTAINER_NAME:-}
       BCC_PARAMETERS_JSON: ${BCC_PARAMETERS_JSON:-}
       BCC_CREDENTIAL_USERNAME: ${BCC_CREDENTIAL_USERNAME:-}
       BCC_CREDENTIAL_PASSWORD: ${BCC_CREDENTIAL_PASSWORD:-}
       BCC_DRY_RUN: ${BCC_DRY_RUN:-false}
+      GITHUB_REPO: ${GITHUB_REPO:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
     volumes:
       # Windows bind mounts require a directory source, so mount the Docker CLI directory.
       - type: bind
@@ -28,7 +31,6 @@ services:
       - type: bind
         source: ${HOST_CONFIG_PATH:-./config}
         target: C:\bootstrap\config
-        read_only: true
       # Keep this absolute path identical on the host and in this container.
       # That makes it valid both to BcContainerHelper and to the host Docker daemon.
       - ${HOST_FILES_PATH}:${HOST_FILES_PATH}
