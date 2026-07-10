@@ -34,7 +34,7 @@ continues under the host Docker engine after the helper exits.
 
 Parameters are merged in this order, with later sources overriding earlier ones:
 
-1. JSON at `BCC_PARAMETERS_FILE`
+1. JSON from `BCC_PARAMETERS_FILENAME` in the mounted config directory
 2. JSON in `BCC_PARAMETERS_JSON`
 3. every environment variable named `BCC_PARAM_<parameterName>`
 

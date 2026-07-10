@@ -36,6 +36,17 @@ function Merge-Parameters {
     }
 }
 
+$configDirectory = [System.IO.Path]::GetFullPath('C:\bootstrap\config')
+foreach ($variableName in 'BCC_CONFIG_FILE', 'BCC_PARAMETERS_FILE') {
+    $configuredPath = [Environment]::GetEnvironmentVariable($variableName)
+    if ($configuredPath) {
+        $fullPath = [System.IO.Path]::GetFullPath($configuredPath)
+        if ([System.IO.Path]::GetDirectoryName($fullPath) -ne $configDirectory) {
+            throw "$variableName must name a file directly inside $configDirectory."
+        }
+    }
+}
+
 $parameters = @{}
 
 if ($env:BCC_PARAMETERS_FILE -and (Test-Path -LiteralPath $env:BCC_PARAMETERS_FILE)) {

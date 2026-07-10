@@ -10,8 +10,8 @@ services:
     environment:
       HOST_DOCKER_PATH: ${HOST_DOCKER_PATH:-C:\docker\docker.exe}
       BCC_COMMAND: ${BCC_COMMAND:-New-BcContainer}
-      BCC_CONFIG_FILE: ${BCC_CONFIG_FILE:-C:\bootstrap\config\bccontainerhelper.config.json}
-      BCC_PARAMETERS_FILE: ${BCC_PARAMETERS_FILE:-C:\bootstrap\config\parameters.json}
+      BCC_CONFIG_FILE: C:\bootstrap\config\${BCC_CONFIG_FILENAME:-bccontainerhelper.config.json}
+      BCC_PARAMETERS_FILE: C:\bootstrap\config\${BCC_PARAMETERS_FILENAME:-parameters.json}
       BCC_PARAMETERS_JSON: ${BCC_PARAMETERS_JSON:-}
       BCC_CREDENTIAL_USERNAME: ${BCC_CREDENTIAL_USERNAME:-}
       BCC_CREDENTIAL_PASSWORD: ${BCC_CREDENTIAL_PASSWORD:-}
@@ -22,7 +22,10 @@ services:
       - type: npipe
         source: \\.\pipe\docker_engine
         target: \\.\pipe\docker_engine
-      - ./config:C:\bootstrap\config:ro
+      - type: bind
+        source: ${HOST_CONFIG_PATH:-./config}
+        target: C:\bootstrap\config
+        read_only: true
       # Keep this absolute path identical on the host and in this container.
       # That makes it valid both to BcContainerHelper and to the host Docker daemon.
       - ${HOST_FILES_PATH}:${HOST_FILES_PATH}
