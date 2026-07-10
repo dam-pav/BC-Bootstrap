@@ -5,11 +5,10 @@ services:
       args:
         WINDOWS_TAG: ${WINDOWS_TAG:-ltsc2022}
         BCCONTAINERHELPER_VERSION: ${BCCONTAINERHELPER_VERSION:-latest}
-        DOCKER_VERSION: ${DOCKER_VERSION:-27.5.1}
-        SEVENZIP_VERSION: ${SEVENZIP_VERSION:-2602}
     image: bccontainerhelper-bootstrap:${WINDOWS_TAG:-ltsc2022}
     isolation: ${DOCKER_ISOLATION:-process}
     environment:
+      HOST_DOCKER_PATH: ${HOST_DOCKER_PATH:-C:\docker\docker.exe}
       BCC_COMMAND: ${BCC_COMMAND:-New-BcContainer}
       BCC_CONFIG_FILE: ${BCC_CONFIG_FILE:-C:\bootstrap\config\bccontainerhelper.config.json}
       BCC_PARAMETERS_FILE: ${BCC_PARAMETERS_FILE:-C:\bootstrap\config\parameters.json}
@@ -18,6 +17,11 @@ services:
       BCC_CREDENTIAL_PASSWORD: ${BCC_CREDENTIAL_PASSWORD:-}
       BCC_DRY_RUN: ${BCC_DRY_RUN:-false}
     volumes:
+      # Bind-mount the host's docker.exe so the container uses the same CLI version as the host
+      - type: bind
+        source: ${HOST_DOCKER_PATH}
+        target: C:\Windows\System32\docker.exe
+        read_only: true
       - type: npipe
         source: \\.\pipe\docker_engine
         target: \\.\pipe\docker_engine
