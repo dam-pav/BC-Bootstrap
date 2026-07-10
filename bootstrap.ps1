@@ -52,14 +52,7 @@ $requiredConfigFiles = @($env:BCC_CONFIG_FILE, $env:BCC_PARAMETERS_FILE)
 $missingConfigFiles = @($requiredConfigFiles | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
 
 if ($missingConfigFiles.Count -gt 0) {
-    if (-not $env:GITHUB_REPO) {
-        $missingNames = ($missingConfigFiles | ForEach-Object { [System.IO.Path]::GetFileName($_) }) -join ', '
-        throw "Required config files are not available in $configDirectory ($missingNames). Set GITHUB_REPO for fallback retrieval."
-    }
-    if ($env:GITHUB_REPO -notmatch '^[^/\s]+/[^/\s]+$') {
-        throw 'GITHUB_REPO must use owner/repository format.'
-    }
-
+    $githubRepo = 'dam-pav/bc-bootstrap'
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     New-Item -ItemType Directory -Path $configDirectory -Force | Out-Null
     $headers = @{
@@ -67,15 +60,12 @@ if ($missingConfigFiles.Count -gt 0) {
         'X-GitHub-Api-Version' = '2022-11-28'
         'User-Agent' = 'BcContainerHelper-bootstrap'
     }
-    if ($env:GITHUB_TOKEN) {
-        $headers.Authorization = "Bearer $($env:GITHUB_TOKEN)"
-    }
 
     foreach ($destination in $missingConfigFiles) {
         $fileName = [System.IO.Path]::GetFileName($destination)
         $encodedFileName = [Uri]::EscapeDataString($fileName)
-        $uri = "https://api.github.com/repos/$($env:GITHUB_REPO)/contents/config/$encodedFileName"
-        Write-Host "Downloading config/$fileName from $($env:GITHUB_REPO)"
+        $uri = "https://api.github.com/repos/$githubRepo/contents/config/$encodedFileName"
+        Write-Host "Downloading config/$fileName from $githubRepo"
         Invoke-RestMethod -Uri $uri -Headers $headers -OutFile $destination
     }
 }

@@ -43,10 +43,9 @@ Parameters are merged in this order, with later sources overriding earlier ones:
 The bootstrap first checks the mounted config directory for both required files.
 This uses files cloned with the stack when the Portainer installation provides
 the complete repository, without requiring GitHub variables. If either file is
-missing (as can happen with Portainer CE), set `GITHUB_REPO` to
-`owner/repository`; only missing files are downloaded from the repository's
-`config/` directory into `HOST_CONFIG_PATH`. Set `GITHUB_TOKEN` when the
-repository is private.
+missing (as can happen with Portainer CE), only the missing files are downloaded
+anonymously from the public `dam-pav/bc-bootstrap` repository's `config/`
+directory into `HOST_CONFIG_PATH`.
 
 This allows any parameter exposed by the installed BcContainerHelper command.
 Unknown names fail early. JSON values retain their types, so booleans, arrays,

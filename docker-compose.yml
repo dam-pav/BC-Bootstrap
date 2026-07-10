@@ -17,8 +17,6 @@ services:
       BCC_CREDENTIAL_USERNAME: ${BCC_CREDENTIAL_USERNAME:-}
       BCC_CREDENTIAL_PASSWORD: ${BCC_CREDENTIAL_PASSWORD:-}
       BCC_DRY_RUN: ${BCC_DRY_RUN:-false}
-      GITHUB_REPO: ${GITHUB_REPO:-}
-      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
     volumes:
       # Windows bind mounts require a directory source, so mount the Docker CLI directory.
       - type: bind
