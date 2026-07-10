@@ -48,7 +48,14 @@ foreach ($variableName in 'BCC_CONFIG_FILE', 'BCC_PARAMETERS_FILE') {
     }
 }
 
-if ($env:GITHUB_REPO) {
+$requiredConfigFiles = @($env:BCC_CONFIG_FILE, $env:BCC_PARAMETERS_FILE)
+$missingConfigFiles = @($requiredConfigFiles | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
+
+if ($missingConfigFiles.Count -gt 0) {
+    if (-not $env:GITHUB_REPO) {
+        $missingNames = ($missingConfigFiles | ForEach-Object { [System.IO.Path]::GetFileName($_) }) -join ', '
+        throw "Required config files are not available in $configDirectory ($missingNames). Set GITHUB_REPO for fallback retrieval."
+    }
     if ($env:GITHUB_REPO -notmatch '^[^/\s]+/[^/\s]+$') {
         throw 'GITHUB_REPO must use owner/repository format.'
     }
@@ -64,7 +71,7 @@ if ($env:GITHUB_REPO) {
         $headers.Authorization = "Bearer $($env:GITHUB_TOKEN)"
     }
 
-    foreach ($destination in $env:BCC_CONFIG_FILE, $env:BCC_PARAMETERS_FILE) {
+    foreach ($destination in $missingConfigFiles) {
         $fileName = [System.IO.Path]::GetFileName($destination)
         $encodedFileName = [Uri]::EscapeDataString($fileName)
         $uri = "https://api.github.com/repos/$($env:GITHUB_REPO)/contents/config/$encodedFileName"
