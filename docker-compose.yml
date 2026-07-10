@@ -9,8 +9,6 @@ services:
         SEVENZIP_VERSION: ${SEVENZIP_VERSION:-2602}
     image: bccontainerhelper-bootstrap:${WINDOWS_TAG:-ltsc2022}
     isolation: ${DOCKER_ISOLATION:-process}
-    env_file:
-      - .env
     environment:
       BCC_COMMAND: ${BCC_COMMAND:-New-BcContainer}
       BCC_CONFIG_FILE: ${BCC_CONFIG_FILE:-C:\bootstrap\config\bccontainerhelper.config.json}

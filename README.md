@@ -52,8 +52,10 @@ For a moving current artifact, set `artifactUrl` to
 resolves it with `Get-BcArtifactUrl -select Latest` immediately before creating
 the container.
 
-Or add arbitrary `BCC_PARAM_*` variables directly to `.env`; the service's
-`env_file` passes them through without requiring a Compose-file change.
+For arbitrary `BCC_PARAM_*` values, either add an explicit mapping under the
+service's `environment` section or place them in `BCC_PARAMETERS_JSON`. Compose
+uses a local `.env` for `${...}` interpolation, while Portainer can provide the
+same values through its stack environment.
 
 `Credential` may be supplied as a JSON object:
 
