@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+$env:PATH = "C:\docker;$env:PATH"
 
 function ConvertTo-NativeValue {
     param([AllowNull()] $Value)

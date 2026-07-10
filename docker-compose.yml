@@ -17,10 +17,10 @@ services:
       BCC_CREDENTIAL_PASSWORD: ${BCC_CREDENTIAL_PASSWORD:-}
       BCC_DRY_RUN: ${BCC_DRY_RUN:-false}
     volumes:
-      # Bind-mount the host's docker.exe so the container uses the same CLI version as the host
+      # Windows bind mounts require a directory source, so mount the Docker CLI directory.
       - type: bind
-        source: ${HOST_DOCKER_PATH:-C:\docker}/docker.exe
-        target: C:\Windows\System32\docker.exe
+        source: ${HOST_DOCKER_PATH:-C:\docker}
+        target: C:\docker
         read_only: true
       - type: npipe
         source: \\.\pipe\docker_engine
