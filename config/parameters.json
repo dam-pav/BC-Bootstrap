@@ -1,0 +1,10 @@
+{
+  "accept_eula": true,
+  "accept_outdated": true,
+  "containerName": "bc-bootstrap-test",
+  "artifactUrl": "latest:sandbox:w1",
+  "auth": "UserPassword",
+  "updateHosts": true,
+  "shortcuts": "None",
+  "memoryLimit": "8G"
+}

@@ -1,0 +1,41 @@
+services:
+  bc-bootstrap:
+    build:
+      context: .
+      args:
+        WINDOWS_TAG: ${WINDOWS_TAG:-ltsc2022}
+        BCCONTAINERHELPER_VERSION: ${BCCONTAINERHELPER_VERSION:-latest}
+        DOCKER_VERSION: ${DOCKER_VERSION:-27.5.1}
+        SEVENZIP_VERSION: ${SEVENZIP_VERSION:-2602}
+    image: bccontainerhelper-bootstrap:${WINDOWS_TAG:-ltsc2022}
+    isolation: ${DOCKER_ISOLATION:-process}
+    env_file:
+      - .env
+    environment:
+      BCC_COMMAND: ${BCC_COMMAND:-New-BcContainer}
+      BCC_CONFIG_FILE: ${BCC_CONFIG_FILE:-C:\bootstrap\config\bccontainerhelper.config.json}
+      BCC_PARAMETERS_FILE: ${BCC_PARAMETERS_FILE:-C:\bootstrap\config\parameters.json}
+      BCC_PARAMETERS_JSON: ${BCC_PARAMETERS_JSON:-}
+      BCC_CREDENTIAL_USERNAME: ${BCC_CREDENTIAL_USERNAME:-}
+      BCC_CREDENTIAL_PASSWORD: ${BCC_CREDENTIAL_PASSWORD:-}
+      BCC_DRY_RUN: ${BCC_DRY_RUN:-false}
+    volumes:
+      - type: npipe
+        source: \\.\pipe\docker_engine
+        target: \\.\pipe\docker_engine
+      - type: bind
+        source: ./config
+        target: C:\bootstrap\config
+        read_only: true
+      # Keep this absolute path identical on the host and in this container.
+      # That makes it valid both to BcContainerHelper and to the host Docker daemon.
+      - type: bind
+        source: ${HOST_FILES_PATH}
+        target: ${HOST_FILES_PATH}
+      - type: bind
+        source: C:\ProgramData\BcContainerHelper
+        target: C:\ProgramData\BcContainerHelper
+      - type: bind
+        source: C:\bcartifacts.cache
+        target: C:\bcartifacts.cache
+    restart: "no"
