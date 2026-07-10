@@ -13,6 +13,11 @@ services:
       BCC_CONFIG_FILE: C:\bootstrap\config\${BCC_CONFIG_FILENAME:-bccontainerhelper.config.json}
       BCC_PARAMETERS_FILE: C:\bootstrap\config\${BCC_PARAMETERS_FILENAME:-parameters.json}
       BCC_CONTAINER_NAME: ${BCC_CONTAINER_NAME:-}
+      # Target network for the Business Central container created by
+      # New-BcContainer. It is independent of the helper's Compose network.
+      BCC_NETWORK_NAME: ${BCC_NETWORK_NAME:-nat}
+      BCC_CONTAINER_IP: ${BCC_CONTAINER_IP:-}
+      BCC_HOST_IP: ${BCC_HOST_IP:-}
       BCC_PARAMETERS_JSON: ${BCC_PARAMETERS_JSON:-}
       BCC_CREDENTIAL_USERNAME: ${BCC_CREDENTIAL_USERNAME:-}
       BCC_CREDENTIAL_PASSWORD: ${BCC_CREDENTIAL_PASSWORD:-}
@@ -35,3 +40,10 @@ services:
       - C:\ProgramData\BcContainerHelper:C:\ProgramData\BcContainerHelper
       - C:\bcartifacts.cache:C:\bcartifacts.cache
     restart: "no"
+    networks:
+      bc-network: {}
+
+networks:
+  bc-network:
+    external: true
+    name: ${BOOTSTRAP_NETWORK_NAME:-nat}

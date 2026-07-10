@@ -30,6 +30,71 @@ Use `docker compose up --build --abort-on-container-exit` if preferred. The
 bootstrap is intentionally a one-shot container; the Business Central container
 continues under the host Docker engine after the helper exits.
 
+## Docker networking
+
+The bootstrap helper and the Business Central container have independent
+network settings:
+
+- `BOOTSTRAP_NETWORK_NAME` is the existing network to which Compose attaches
+  the one-shot helper. The default is Docker's `nat` network.
+- `BCC_NETWORK_NAME` is passed to `New-BcContainer -network` and controls the
+  network of the created Business Central container.
+
+They do not need to use the same network or network driver. The helper only
+needs routed access to the BC container's WinRM HTTPS endpoint and a way to
+resolve its name. When `BCC_CONTAINER_IP` is set, the bootstrap adds a temporary
+name-to-address mapping to its own hosts file before running New-BcContainer.
+
+For a NAT deployment, no additional file is needed:
+
+```powershell
+docker compose run --rm bc-bootstrap
+```
+
+For a transparent BC deployment, create the target network once on the Docker
+host. The helper can remain on `nat`:
+
+```powershell
+docker network create -d transparent `
+  --subnet 192.168.10.0/24 `
+  --gateway 192.168.10.1 `
+  bc-transparent
+```
+
+Set these values in `.env` (using addresses appropriate for that subnet):
+
+```dotenv
+BOOTSTRAP_NETWORK_NAME=nat
+BCC_NETWORK_NAME=bc-transparent
+BCC_CONTAINER_IP=192.168.10.41
+BCC_HOST_IP=192.168.10.10
+```
+
+Then deploy normally:
+
+```powershell
+docker compose up --build --abort-on-container-exit
+```
+
+`BCC_CONTAINER_IP` is passed to `New-BcContainer -IP`. The bootstrap also adds
+that address and `BCC_CONTAINER_NAME` to its own hosts file before creation,
+which makes the post-create WinRM session independent of DNS propagation.
+
+The host routing and firewall must allow the NAT-attached helper to reach the
+transparent address over WinRM HTTPS (normally TCP 5986). If that route is not
+available in a particular environment, attach the helper to a network that can
+reach the target; matching the transparent driver is not otherwise required.
+
+For durable access from other machines, register an A record for the BC
+container name (or the value supplied through the BcContainerHelper
+`PublicDnsName` parameter) at `BCC_CONTAINER_IP`. Reserve or exclude that static
+address in DHCP/IPAM.
+
+BcContainerHelper's related parameters remain available through
+`config/parameters.json`, `BCC_PARAMETERS_JSON`, or `BCC_PARAM_*`: `dns`,
+`hostIP`, `macAddress`, `PublicDnsName`, `PublishPorts`, and `updateHosts`.
+Explicit parameter values override the dedicated network environment defaults.
+
 ## Parameter sources
 
 Parameters are merged in this order, with later sources overriding earlier ones:

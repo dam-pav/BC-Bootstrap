@@ -88,6 +88,36 @@ if ($env:BCC_CONTAINER_NAME) {
     $parameters['containerName'] = $env:BCC_CONTAINER_NAME
 }
 
+# Select the target network for the BC container. This is independent of the
+# Compose network used by the one-shot helper. Explicit JSON/BCC_PARAM values win.
+if ($env:BCC_NETWORK_NAME -and -not $parameters.ContainsKey('network')) {
+    $parameters['network'] = $env:BCC_NETWORK_NAME
+}
+if ($env:BCC_CONTAINER_IP -and -not $parameters.ContainsKey('IP')) {
+    $parameters['IP'] = $env:BCC_CONTAINER_IP
+}
+if ($env:BCC_HOST_IP -and -not $parameters.ContainsKey('hostIP')) {
+    $parameters['hostIP'] = $env:BCC_HOST_IP
+}
+
+# Windows transparent networks do not guarantee Docker name resolution. A
+# static mapping lets BcContainerHelper establish its post-create WinRM session
+# even before an external DNS A record has been registered.
+if ($parameters.ContainsKey('IP') -and $parameters.ContainsKey('containerName')) {
+    $containerName = [string]$parameters['containerName']
+    $containerIP = [string]$parameters['IP']
+    if ($containerName -and $containerIP) {
+        $hostsPath = Join-Path $env:SystemRoot 'System32\drivers\etc\hosts'
+        $escapedName = [regex]::Escape($containerName)
+        $existingMapping = Select-String -LiteralPath $hostsPath `
+            -Pattern "^\s*\S+\s+$escapedName(?:\s|$)" -Quiet
+        if (-not $existingMapping) {
+            Add-Content -LiteralPath $hostsPath -Value "$containerIP $containerName"
+            Write-Host "Registered $containerName as $containerIP in bootstrap hosts file"
+        }
+    }
+}
+
 if ($parameters.ContainsKey('Credential')) {
     $credentialValue = $parameters['Credential']
     if ($credentialValue -is [hashtable]) {
