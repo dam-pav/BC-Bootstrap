@@ -18,26 +18,15 @@ services:
       BCC_DRY_RUN: ${BCC_DRY_RUN:-false}
     volumes:
       # Bind-mount the host's docker.exe so the container uses the same CLI version as the host
-      - type: bind
-        source: ${HOST_DOCKER_PATH}
-        target: C:\Windows\System32\docker.exe
-        read_only: true
+      - ${HOST_DOCKER_PATH}:/Windows/System32/docker.exe:ro
       - type: npipe
         source: \\.\pipe\docker_engine
         target: \\.\pipe\docker_engine
-      - type: bind
-        source: ./config
-        target: C:\bootstrap\config
-        read_only: true
+      - ./config:C:\bootstrap\config:ro
       # Keep this absolute path identical on the host and in this container.
       # That makes it valid both to BcContainerHelper and to the host Docker daemon.
-      - type: bind
-        source: ${HOST_FILES_PATH}
-        target: ${HOST_FILES_PATH}
-      - type: bind
-        source: C:\ProgramData\BcContainerHelper
-        target: C:\ProgramData\BcContainerHelper
-      - type: bind
-        source: C:\bcartifacts.cache
-        target: C:\bcartifacts.cache
+      # NOTE: Ensure ${HOST_FILES_PATH} exists on the host before deploying.
+      - ${HOST_FILES_PATH}:${HOST_FILES_PATH}
+      - C:\ProgramData\BcContainerHelper:C:\ProgramData\BcContainerHelper
+      - C:\bcartifacts.cache:C:\bcartifacts.cache
     restart: "no"
